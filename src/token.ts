@@ -51,13 +51,13 @@ export enum TokenType {
 export class Token {
   tokenType: TokenType;
   lexeme: string;
-  literal: object | string | null;
+  literal: object | string | number | null;
   line: number;
 
   constructor(
     tokenType: TokenType,
     lexeme: string,
-    literal: object | string | null,
+    literal: object | string | number | null,
     line: number,
   ) {
     this.tokenType = tokenType;

@@ -15,4 +15,11 @@ describe("Scanner", function () {
     const tokens = new Scanner(source).scanTokens();
     assert.equal(tokens.length, 3);
   });
+
+  it("handles numbers", function () {
+    const source = `45 ==1.35`;
+    const tokens = new Scanner(source).scanTokens();
+    console.log(tokens);
+    assert.equal(tokens.length, 4);
+  });
 });

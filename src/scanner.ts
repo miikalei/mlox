@@ -109,7 +109,11 @@ export class Scanner {
         break;
 
       default:
-        this.reportError?.(this.line, "Unexpected character.");
+        if (isDigit(c)) {
+          this.number();
+        } else {
+          this.reportError?.(this.line, "Unexpected character.");
+        }
         break;
     }
   }
@@ -133,6 +137,27 @@ export class Scanner {
     // Trim the surrounding quotes.
     const value = this.source.substring(this.start + 1, this.current - 1);
     this.addToken(TokenType.STRING, value);
+  }
+
+  private number() {
+    while (isDigit(this.peek())) {
+      this.advance();
+    }
+
+    // Look for a fractional part.
+    if (this.peek() == "." && isDigit(this.peekNext())) {
+      // Consume the "."
+      this.advance();
+
+      while (isDigit(this.peek())) {
+        this.advance();
+      }
+    }
+
+    this.addToken(
+      TokenType.NUMBER,
+      parseFloat(this.source.substring(this.start, this.current)),
+    );
   }
 
   private advance() {
@@ -159,11 +184,22 @@ export class Scanner {
     return this.source.charAt(this.current);
   }
 
+  private peekNext() {
+    if (this.current + 1 >= this.source.length) {
+      return "\0";
+    }
+    return this.source.charAt(this.current + 1);
+  }
+
   private addToken(
     tokenType: TokenType,
-    literal: object | string | null = null,
+    literal: object | string | number | null = null,
   ) {
     const text = this.source.substring(this.start, this.current);
     this.tokens.push(new Token(tokenType, text, literal, this.line));
   }
+}
+
+function isDigit(c: string | undefined) {
+  return !!c && c >= "0" && c <= "9";
 }
