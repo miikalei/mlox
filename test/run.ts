@@ -1,10 +1,14 @@
-import { assert } from "chai";
-import { main } from "../src/mlox"
+import { Run } from "../src/run";
 
-describe('The program should run', () => {
-  it("Should return 6", () => {
-    const result = main();
-    assert.equal(result, 6)
-  })
+describe("Running source", () => {
+  it("should succeed", () => {
+    new Run().run("source");
+  });
 
-})
+  it("should handle complex code", () => {
+    const source = `// this is a comment
+(( )){} // grouping stuff
+!*+-/=<> <= == // operators`;
+    new Run().run(source);
+  });
+});

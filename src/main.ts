@@ -1,5 +1,8 @@
 import fs from 'fs'
 import rl from 'readline'
+import {Run} from './run'
+
+const runtime = new Run();
 
 export async function main() {
   const args = process.argv.slice(2);
@@ -15,7 +18,7 @@ export async function main() {
 
 function runFile(path: string) {
   const fileContent = fs.readFileSync(path).toString();
-  run(fileContent);
+  runtime.runProgram(fileContent)
 }
 
 async function runPrompt() {
@@ -23,7 +26,7 @@ async function runPrompt() {
     input: process.stdin,
     output: process.stdout,
   })
-  io.setPrompt('€');
+  io.setPrompt('> ');
   async function getLine(): Promise<string> {
     io.prompt();
     return new Promise(r => io.once('line',r))
@@ -35,12 +38,8 @@ async function runPrompt() {
       io.close();
       break;
     }
-    run(line);
+    runtime.runLine(line);
   }
-}
-
-function run(input: string) {
-  console.log(input)
 }
 
 await main();
