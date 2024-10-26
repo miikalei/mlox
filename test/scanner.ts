@@ -19,7 +19,14 @@ describe("Scanner", function () {
   it("handles numbers", function () {
     const source = `45 ==1.35`;
     const tokens = new Scanner(source).scanTokens();
-    console.log(tokens);
     assert.equal(tokens.length, 4);
+  });
+
+  it("handles identifiers and keywords", function () {
+    const source = `fun foo() {
+      var test = built_IN
+    }`;
+    const tokens = new Scanner(source).scanTokens();
+    assert.equal(tokens.length, 11);
   });
 });

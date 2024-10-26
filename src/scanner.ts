@@ -111,6 +111,8 @@ export class Scanner {
       default:
         if (isDigit(c)) {
           this.number();
+        } else if (isAlpha(c)) {
+          this.identifier();
         } else {
           this.reportError?.(this.line, "Unexpected character.");
         }
@@ -160,6 +162,16 @@ export class Scanner {
     );
   }
 
+  private identifier() {
+    while (isAlphaNumeric(this.peek())) {
+      this.advance();
+    }
+
+    const text = this.source.substring(this.start, this.current);
+    const tokenType = keyWords.get(text) ?? TokenType.IDENTIFIER;
+    this.addToken(tokenType);
+  }
+
   private advance() {
     this.current++;
     return this.source.at(this.current - 1);
@@ -200,6 +212,35 @@ export class Scanner {
   }
 }
 
+const keyWords = new Map(
+  Object.entries({
+    and: TokenType.AND,
+    class: TokenType.CLASS,
+    else: TokenType.ELSE,
+    false: TokenType.FALSE,
+    for: TokenType.FOR,
+    fun: TokenType.FUN,
+    if: TokenType.IF,
+    nil: TokenType.NIL,
+    or: TokenType.OR,
+    print: TokenType.PRINT,
+    return: TokenType.RETURN,
+    super: TokenType.SUPER,
+    this: TokenType.THIS,
+    true: TokenType.TRUE,
+    var: TokenType.VAR,
+    while: TokenType.WHILE,
+  }),
+);
+
 function isDigit(c: string | undefined) {
   return !!c && c >= "0" && c <= "9";
+}
+
+function isAlpha(c: string | undefined) {
+  return !!c && ((c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c == "_");
+}
+
+function isAlphaNumeric(c: string | undefined) {
+  return isAlpha(c) || isDigit(c);
 }
