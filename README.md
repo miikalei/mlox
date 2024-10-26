@@ -1,0 +1,1 @@
+This is a Typescript implementation of a programming language mlox, a modified version of the toy language lox, introduced in the book Crafting Interpreters by Robert Nystrom. Purpose of this project is to allow me to better follow through the book as I go.
