@@ -14,6 +14,7 @@
     "@types/chai": "^5",
     "@types/eslint__js": "^8.42.3",
     "@types/mocha": "^10",
+    "@types/node": "^22.8.1",
     "chai": "^5.1.2",
     "eslint": "^9.13.0",
     "mocha": "^10.7.3",
