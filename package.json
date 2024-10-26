@@ -2,10 +2,9 @@
   "name": "mlox",
   "type": "module",
   "packageManager": "yarn@4.5.1",
-  "main": "dist/src/main.js",
+  "main": "src/main.ts",
   "scripts": {
-    "start": "tsc && node dist/src/main.js",
-    "transpile": "tsx src/main.ts",
+    "start": "tsx src/main.ts",
     "lint": "eslint",
     "test": "mocha"
   },
