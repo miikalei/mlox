@@ -32,7 +32,7 @@ export class Scanner {
     return this.tokens;
   }
 
-  public scanToken() {
+  private scanToken() {
     const c = this.advance();
     switch (c) {
       case "(":
@@ -104,10 +104,35 @@ export class Scanner {
         this.line++;
         break;
 
+      case '"':
+        this.string();
+        break;
+
       default:
         this.reportError?.(this.line, "Unexpected character.");
         break;
     }
+  }
+
+  private string() {
+    while (this.peek() != '"' && !this.isAtEnd()) {
+      if (this.peek() == "\n") {
+        this.line++;
+      }
+      this.advance();
+    }
+
+    if (this.isAtEnd()) {
+      this.reportError?.(this.line, "Unterminated string");
+      return;
+    }
+
+    // The closing
+    this.advance();
+
+    // Trim the surrounding quotes.
+    const value = this.source.substring(this.start + 1, this.current - 1);
+    this.addToken(TokenType.STRING, value);
   }
 
   private advance() {
@@ -134,7 +159,10 @@ export class Scanner {
     return this.source.charAt(this.current);
   }
 
-  private addToken(tokenType: TokenType, literal: object | null = null) {
+  private addToken(
+    tokenType: TokenType,
+    literal: object | string | null = null,
+  ) {
     const text = this.source.substring(this.start, this.current);
     this.tokens.push(new Token(tokenType, text, literal, this.line));
   }
