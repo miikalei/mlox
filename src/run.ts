@@ -1,3 +1,5 @@
+import { ASTPrinter } from "./ast-printer";
+import { Parser } from "./parser";
 import { Scanner } from "./scanner";
 
 export class Run {
@@ -28,9 +30,13 @@ export class Run {
   run(source: string) {
     const scanner = new Scanner(source, this.error.bind(this));
     const tokens = scanner.scanTokens();
+    const parser = new Parser(tokens, this.report.bind(this));
+    const expr = parser.parse();
 
-    for (const token of tokens) {
-      console.log(token);
+    if (this.hadError) {
+      return;
     }
+
+    console.log(expr?.accept(ASTPrinter));
   }
 }

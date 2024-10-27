@@ -4,7 +4,7 @@ interface Visitable {
   accept: (visitor: ASTVisitor<unknown>) => unknown;
 }
 
-type Value = object | string | number;
+type Value = object | string | number | boolean | null;
 export type Expr = Literal | Unary | Binary | Grouping;
 
 class Binary implements Visitable {
