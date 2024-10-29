@@ -1,14 +1,20 @@
-import { ASTPrinter } from "./ast-printer";
+import assert from "assert";
+import { Interpreter, RuntimeError } from "./interpreter";
 import { Parser } from "./parser";
 import { Scanner } from "./scanner";
 
 export class Run {
+  interpreter = new Interpreter(this.runtimeError);
   hadError = false;
+  hadRuntimeError = false;
 
   runProgram(source: string) {
     this.run(source);
     if (this.hadError) {
       process.exit(65);
+    }
+    if (this.hadRuntimeError) {
+      process.exit(70);
     }
   }
 
@@ -18,8 +24,12 @@ export class Run {
   }
 
   error(line: number, message: string) {
-    console.log("Type:", typeof this.report);
     this.report(line, "", message);
+  }
+
+  runtimeError(error: RuntimeError) {
+    console.log(error.message + "\n[line " + error.token.line + "]");
+    this.hadRuntimeError = true;
   }
 
   private report(line: number, where: string, message: string) {
@@ -36,7 +46,8 @@ export class Run {
     if (this.hadError) {
       return;
     }
+    assert(expr);
 
-    console.log(expr?.accept(ASTPrinter));
+    this.interpreter.interpret(expr);
   }
 }

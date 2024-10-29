@@ -4,10 +4,10 @@ interface Visitable {
   accept: (visitor: ASTVisitor<unknown>) => unknown;
 }
 
-type Value = object | string | number | boolean | null;
+export type Value = object | string | number | boolean | null;
 export type Expr = Literal | Unary | Binary | Grouping;
 
-class Binary implements Visitable {
+export class Binary implements Visitable {
   constructor(
     public left: Expr,
     public operator: Token,
@@ -19,7 +19,7 @@ class Binary implements Visitable {
   }
 }
 
-class Grouping implements Visitable {
+export class Grouping implements Visitable {
   constructor(public expression: Expr) {}
 
   public accept<R>(visitor: ASTVisitor<R>) {
@@ -27,7 +27,7 @@ class Grouping implements Visitable {
   }
 }
 
-class Literal implements Visitable {
+export class Literal implements Visitable {
   constructor(public value: Value) {}
 
   public accept<R>(visitor: ASTVisitor<R>) {
@@ -35,7 +35,7 @@ class Literal implements Visitable {
   }
 }
 
-class Unary implements Visitable {
+export class Unary implements Visitable {
   constructor(
     public operator: Token,
     public right: Expr,
@@ -51,7 +51,8 @@ export const Expr = {
   Grouping,
   Literal,
   Unary,
-};
+} as const;
+
 export type ASTVisitor<R> = {
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
