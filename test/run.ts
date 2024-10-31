@@ -31,4 +31,9 @@ describe("Running source", () => {
     new Run().run(`print (-4+5) / (-2-(-1)) == -1;`);
     assert(spy.calledWith("true"));
   });
+
+  it("Should store global state", function () {
+    new Run().run(`var a = 3*4; print(a -10);`);
+    assert(spy.calledWith("2"));
+  });
 });

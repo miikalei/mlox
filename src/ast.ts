@@ -5,26 +5,37 @@ interface Visitable<Visitor> {
 }
 
 export type Value = object | string | number | boolean | null;
-export type Expr = Literal | Unary | Binary | Grouping;
-export type Stmt = Expression | Print;
+export type Expr = Literal | Unary | Binary | Grouping | Variable;
+export type Stmt = Expression | Print | Var;
 
-export class Expression<R = unknown> implements Visitable<StmtVisitor<R>> {
+export class Expression implements Visitable<StmtVisitor> {
   constructor(public expression: Expr) {}
 
   public accept<R>(visitor: StmtVisitor<R>) {
-    return visitor.visitExpressionExpr(this);
+    return visitor.visitExpressionStmt(this);
   }
 }
 
-export class Print<R = unknown> implements Visitable<StmtVisitor<R>> {
+export class Print implements Visitable<StmtVisitor> {
   constructor(public expression: Expr) {}
 
   public accept<R>(visitor: StmtVisitor<R>) {
-    return visitor.visitPrintExpr(this);
+    return visitor.visitPrintStmt(this);
   }
 }
 
-export class Binary<R = unknown> implements Visitable<ExprVisitor<R>> {
+export class Var implements Visitable<StmtVisitor> {
+  constructor(
+    public name: Token,
+    public initializer: Expr | null,
+  ) {}
+
+  public accept<R>(visitor: StmtVisitor<R>) {
+    return visitor.visitVarStmt(this);
+  }
+}
+
+export class Binary implements Visitable<ExprVisitor> {
   constructor(
     public left: Expr,
     public operator: Token,
@@ -36,7 +47,7 @@ export class Binary<R = unknown> implements Visitable<ExprVisitor<R>> {
   }
 }
 
-export class Grouping<R = unknown> implements Visitable<ExprVisitor<R>> {
+export class Grouping implements Visitable<ExprVisitor> {
   constructor(public expression: Expr) {}
 
   public accept<R>(visitor: ExprVisitor<R>) {
@@ -44,7 +55,7 @@ export class Grouping<R = unknown> implements Visitable<ExprVisitor<R>> {
   }
 }
 
-export class Literal<R = unknown> implements Visitable<ExprVisitor<R>> {
+export class Literal implements Visitable<ExprVisitor> {
   constructor(public value: Value) {}
 
   public accept<R>(visitor: ExprVisitor<R>) {
@@ -52,7 +63,15 @@ export class Literal<R = unknown> implements Visitable<ExprVisitor<R>> {
   }
 }
 
-export class Unary<R = unknown> implements Visitable<ExprVisitor<R>> {
+export class Variable implements Visitable<ExprVisitor> {
+  constructor(public name: Token) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitVariableExpr(this);
+  }
+}
+
+export class Unary implements Visitable<ExprVisitor> {
   constructor(
     public operator: Token,
     public right: Expr,
@@ -67,22 +86,26 @@ export const Expr = {
   Binary,
   Grouping,
   Literal,
+  Variable,
   Unary,
 } as const;
 
 export const Stmt = {
   Expression,
   Print,
+  Var,
 };
 
-export type ExprVisitor<R> = {
+export type ExprVisitor<R = unknown> = {
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
-  visitUnaryExpr: (expr: Unary<R>) => R;
+  visitUnaryExpr: (expr: Unary) => R;
+  visitVariableExpr: (expr: Variable) => R;
   visitLiteralExpr: (expr: Literal) => R;
 };
 
-export type StmtVisitor<R> = {
-  visitExpressionExpr: (stmt: Expression) => R;
-  visitPrintExpr: (stmt: Print) => R;
+export type StmtVisitor<R = unknown> = {
+  visitExpressionStmt: (stmt: Expression) => R;
+  visitPrintStmt: (stmt: Print) => R;
+  visitVarStmt: (stmt: Var) => R;
 };

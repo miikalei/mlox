@@ -10,10 +10,14 @@ import type {
   StmtVisitor,
   Print,
   Stmt,
+  Var,
+  Variable,
 } from "./ast";
+import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
 
 export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
+  environment = new Environment();
   reportError?: (error: RuntimeError) => void;
 
   constructor(reportError?: (error: RuntimeError) => void) {
@@ -38,12 +42,22 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     stmt.accept(this);
   }
 
-  public visitExpressionExpr(stmt: Expression) {
+  public visitVarStmt(stmt: Var) {
+    let value = null;
+    if (stmt.initializer !== null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.environment.define(stmt.name.lexeme, value);
+    return null;
+  }
+
+  public visitExpressionStmt(stmt: Expression) {
     this.evaluate(stmt.expression);
     return;
   }
 
-  public visitPrintExpr(stmt: Print) {
+  public visitPrintStmt(stmt: Print) {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
     return null;
@@ -117,6 +131,10 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     }
     // Unreachable
     return null;
+  }
+
+  public visitVariableExpr(expr: Variable) {
+    return this.environment.get(expr.name);
   }
 
   private evaluate(expr: Expr): Value {
