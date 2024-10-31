@@ -36,4 +36,9 @@ describe("Running source", () => {
     new Run().run(`var a = 3*4; print(a -10);`);
     assert(spy.calledWith("2"));
   });
+
+  it("supports assigment", function () {
+    new Run().run(`var a = 5; a=3; print a;`);
+    assert(spy.calledWith("3"));
+  });
 });

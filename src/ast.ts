@@ -5,7 +5,7 @@ interface Visitable<Visitor> {
 }
 
 export type Value = object | string | number | boolean | null;
-export type Expr = Literal | Unary | Binary | Grouping | Variable;
+export type Expr = Assign | Literal | Unary | Binary | Grouping | Variable;
 export type Stmt = Expression | Print | Var;
 
 export class Expression implements Visitable<StmtVisitor> {
@@ -32,6 +32,17 @@ export class Var implements Visitable<StmtVisitor> {
 
   public accept<R>(visitor: StmtVisitor<R>) {
     return visitor.visitVarStmt(this);
+  }
+}
+
+export class Assign implements Visitable<ExprVisitor> {
+  constructor(
+    public name: Token,
+    public value: Expr,
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitAssignExpr(this);
   }
 }
 
@@ -83,6 +94,7 @@ export class Unary implements Visitable<ExprVisitor> {
 }
 
 export const Expr = {
+  Assign,
   Binary,
   Grouping,
   Literal,
@@ -97,6 +109,7 @@ export const Stmt = {
 };
 
 export type ExprVisitor<R = unknown> = {
+  visitAssignExpr: (expr: Assign) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
   visitUnaryExpr: (expr: Unary) => R;

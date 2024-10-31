@@ -16,4 +16,13 @@ export class Environment {
   public define(name: string, value: Value) {
     this.values.set(name, value);
   }
+
+  public assign(name: Token, value: Value) {
+    if (this.values.has(name.lexeme)) {
+      this.values.set(name.lexeme, value);
+      return;
+    }
+
+    throw new RuntimeError(name, `Undefined variable ${name.lexeme}.`);
+  }
 }

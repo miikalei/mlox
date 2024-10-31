@@ -12,6 +12,7 @@ import type {
   Stmt,
   Var,
   Variable,
+  Assign,
 } from "./ast";
 import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
@@ -61,6 +62,12 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
     return null;
+  }
+
+  public visitAssignExpr(expr: Assign) {
+    const value = this.evaluate(expr.value);
+    this.environment.assign(expr.name, value);
+    return value;
   }
 
   public visitLiteralExpr(expr: Literal) {
