@@ -89,4 +89,17 @@ describe("Running source", () => {
     new Run().run(`print true and false;`);
     assert(spy.calledOnceWith("false"));
   });
+
+  it("supports looping", function () {
+    new Run().run(`
+      var a = 0;
+      var temp;
+      for (var b = 1; a < 10000; b = temp + b) {
+        print a;
+        temp = a;
+        a = b;
+      }
+ `);
+    assert(spy.getCalls().length === 21);
+  });
 });

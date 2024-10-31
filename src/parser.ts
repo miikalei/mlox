@@ -51,6 +51,9 @@ export class Parser {
   }
 
   private statement(): Stmt {
+    if (this.match(TokenType.FOR)) {
+      return this.forStatement();
+    }
     if (this.match(TokenType.IF)) {
       return this.ifStatement();
     }
@@ -60,7 +63,57 @@ export class Parser {
     if (this.match(TokenType.LEFT_BRACE)) {
       return new Stmt.Block(this.block());
     }
+    if (this.match(TokenType.WHILE)) {
+      this.whileStatement();
+    }
     return this.expressionStatement();
+  }
+
+  private forStatement() {
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+    const initializer = (() => {
+      if (this.match(TokenType.SEMICOLON)) {
+        return null;
+      } else if (this.match(TokenType.VAR)) {
+        return this.varDeclaration();
+      } else {
+        return this.expressionStatement();
+      }
+    })();
+
+    const condition = !this.check(TokenType.SEMICOLON)
+      ? this.expression()
+      : new Expr.Literal(true);
+    this.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+    const increment = !this.check(TokenType.SEMICOLON)
+      ? this.expression()
+      : null;
+
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    let body = this.statement();
+
+    if (increment !== null) {
+      body = new Stmt.Block([body, new Stmt.Expression(increment)]);
+    }
+    body = new Stmt.While(condition, body);
+    if (initializer !== null) {
+      body = new Stmt.Block([initializer, body]);
+    }
+
+    return body;
+  }
+
+  private whileStatement() {
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
+    const condition = this.expression();
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+
+    const body = this.statement();
+
+    return new Stmt.While(condition, body);
   }
 
   private block() {

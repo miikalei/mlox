@@ -16,6 +16,7 @@ import type {
   Block,
   If,
   Logical,
+  While,
 } from "./ast";
 import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
@@ -66,6 +67,13 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
       this.execute(stmt.thenBranch);
     } else if (stmt.elseBranch !== null) {
       this.execute(stmt.elseBranch);
+    }
+    return null;
+  }
+
+  public visitWhileStmt(stmt: While) {
+    while (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.body);
     }
     return null;
   }
