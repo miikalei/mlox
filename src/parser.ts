@@ -50,7 +50,10 @@ export class Parser {
     return new Stmt.Var(name, initializer);
   }
 
-  private statement() {
+  private statement(): Stmt {
+    if (this.match(TokenType.IF)) {
+      return this.ifStatement();
+    }
     if (this.match(TokenType.PRINT)) {
       return this.printStatement();
     }
@@ -73,6 +76,20 @@ export class Parser {
     return statements;
   }
 
+  private ifStatement() {
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'");
+    const condition = this.expression();
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+
+    const stmt = this.statement();
+    let elseStmt = null;
+    if (this.match(TokenType.ELSE)) {
+      elseStmt = this.statement();
+    }
+
+    return new Stmt.If(condition, stmt, elseStmt);
+  }
+
   private printStatement() {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expect ';' after value.");
@@ -90,7 +107,7 @@ export class Parser {
   }
 
   private assignment(): Expr {
-    const expr = this.equality();
+    const expr = this.or();
 
     if (this.match(TokenType.EQUAL)) {
       const equals = this.previous();
@@ -102,6 +119,30 @@ export class Parser {
       }
 
       this.error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
+  }
+
+  private or(): Expr {
+    let expr = this.and();
+
+    while (this.match(TokenType.OR)) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Expr.Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private and() {
+    let expr = this.equality();
+
+    while (this.match(TokenType.AND)) {
+      const operator = this.previous();
+      const right = this.equality();
+      expr = new Expr.Logical(expr, operator, right);
     }
 
     return expr;

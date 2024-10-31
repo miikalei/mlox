@@ -5,8 +5,15 @@ interface Visitable<Visitor> {
 }
 
 export type Value = object | string | number | boolean | null;
-export type Expr = Assign | Literal | Unary | Binary | Grouping | Variable;
-export type Stmt = Block | Expression | Print | Var;
+export type Expr =
+  | Assign
+  | Literal
+  | Unary
+  | Logical
+  | Binary
+  | Grouping
+  | Variable;
+export type Stmt = Block | If | Expression | Print | Var;
 
 export class Block implements Visitable<StmtVisitor> {
   constructor(public statements: Stmt[]) {}
@@ -21,6 +28,18 @@ export class Expression implements Visitable<StmtVisitor> {
 
   public accept<R>(visitor: StmtVisitor<R>) {
     return visitor.visitExpressionStmt(this);
+  }
+}
+
+export class If implements Visitable<StmtVisitor> {
+  constructor(
+    public condition: Expr,
+    public thenBranch: Stmt,
+    public elseBranch: Stmt | null,
+  ) {}
+
+  public accept<R>(visitor: StmtVisitor<R>) {
+    return visitor.visitIfStmt(this);
   }
 }
 
@@ -51,6 +70,18 @@ export class Assign implements Visitable<ExprVisitor> {
 
   public accept<R>(visitor: ExprVisitor<R>) {
     return visitor.visitAssignExpr(this);
+  }
+}
+
+export class Logical implements Visitable<ExprVisitor> {
+  constructor(
+    public left: Expr,
+    public operator: Token,
+    public right: Expr,
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitLogicalExpr(this);
   }
 }
 
@@ -103,6 +134,7 @@ export class Unary implements Visitable<ExprVisitor> {
 
 export const Expr = {
   Assign,
+  Logical,
   Binary,
   Grouping,
   Literal,
@@ -112,6 +144,7 @@ export const Expr = {
 
 export const Stmt = {
   Block,
+  If,
   Expression,
   Print,
   Var,
@@ -119,6 +152,7 @@ export const Stmt = {
 
 export type ExprVisitor<R = unknown> = {
   visitAssignExpr: (expr: Assign) => R;
+  visitLogicalExpr: (expr: Logical) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
   visitUnaryExpr: (expr: Unary) => R;
@@ -128,6 +162,7 @@ export type ExprVisitor<R = unknown> = {
 
 export type StmtVisitor<R = unknown> = {
   visitBlockStmt: (stmt: Block) => R;
+  visitIfStmt: (stmt: If) => R;
   visitExpressionStmt: (stmt: Expression) => R;
   visitPrintStmt: (stmt: Print) => R;
   visitVarStmt: (stmt: Var) => R;

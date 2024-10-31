@@ -14,6 +14,8 @@ import type {
   Variable,
   Assign,
   Block,
+  If,
+  Logical,
 } from "./ast";
 import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
@@ -59,6 +61,15 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     return;
   }
 
+  public visitIfStmt(stmt: If) {
+    if (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.thenBranch);
+    } else if (stmt.elseBranch !== null) {
+      this.execute(stmt.elseBranch);
+    }
+    return null;
+  }
+
   public visitPrintStmt(stmt: Print) {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
@@ -91,6 +102,18 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   public visitLiteralExpr(expr: Literal) {
     return expr.value;
+  }
+
+  public visitLogicalExpr(expr: Logical) {
+    const left = this.evaluate(expr.left);
+
+    if (expr.operator.tokenType === TokenType.OR) {
+      if (this.isTruthy(left)) return left;
+    } else {
+      if (!this.isTruthy(left)) return left;
+    }
+
+    return this.evaluate(expr.right);
   }
 
   public visitGroupingExpr(expr: Grouping) {

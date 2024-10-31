@@ -75,4 +75,18 @@ describe("Running source", () => {
     assert(logs[7].calledWith("global b"));
     assert(logs[8].calledWith("global c"));
   });
+
+  it("supports conditionals", function () {
+    new Run().run(`if (true) print "yes";`);
+    assert(spy.calledWith("yes"));
+  });
+  it("supports else branch", function () {
+    new Run().run(`if (1+1==3) print "yes"; else var a;`);
+    assert(spy.notCalled);
+  });
+
+  it("supports logical operators", function () {
+    new Run().run(`print true and false;`);
+    assert(spy.calledOnceWith("false"));
+  });
 });
