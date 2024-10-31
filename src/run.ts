@@ -1,4 +1,3 @@
-import assert from "assert";
 import { Interpreter, RuntimeError } from "./interpreter";
 import { Parser } from "./parser";
 import { Scanner } from "./scanner";
@@ -41,13 +40,12 @@ export class Run {
     const scanner = new Scanner(source, this.error.bind(this));
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens, this.report.bind(this));
-    const expr = parser.parse();
+    const statements = parser.parse();
 
     if (this.hadError) {
       return;
     }
-    assert(expr);
 
-    this.interpreter.interpret(expr);
+    this.interpreter.interpret(statements);
   }
 }

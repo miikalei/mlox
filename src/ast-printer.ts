@@ -1,4 +1,4 @@
-import { ASTVisitor, Expr } from "./expr";
+import { ASTVisitor, Expr } from "./ast";
 
 export const ASTPrinter: ASTVisitor<string> = {
   visitBinaryExpr: (expr) =>

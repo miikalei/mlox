@@ -12,6 +12,7 @@ describe("parser", function () {
         lexeme: '"juuh"',
         literal: "juuh",
       },
+      { tokenType: TokenType.SEMICOLON, line: 1, lexeme: "", literal: null },
       { tokenType: TokenType.EOF, line: 2, lexeme: "", literal: "" },
     ]).parse();
     assert.isNotNull(expr);

@@ -1,25 +1,30 @@
 import type {
-  ASTVisitor,
   Expr,
   Literal,
   Grouping,
   Value,
   Binary,
   Unary,
-} from "./expr";
+  Expression,
+  ExprVisitor,
+  StmtVisitor,
+  Print,
+  Stmt,
+} from "./ast";
 import { Token, TokenType } from "./token";
 
-export class Interpreter implements ASTVisitor<Value> {
+export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   reportError?: (error: RuntimeError) => void;
 
   constructor(reportError?: (error: RuntimeError) => void) {
     this.reportError = reportError;
   }
 
-  public interpret(expr: Expr) {
+  public interpret(statements: Stmt[]) {
     try {
-      const value = this.evaluate(expr);
-      console.log(stringify(value));
+      for (const statement of statements) {
+        this.execute(statement);
+      }
     } catch (error: unknown) {
       if (error instanceof RuntimeError) {
         this.reportError?.(error);
@@ -27,6 +32,21 @@ export class Interpreter implements ASTVisitor<Value> {
         throw error;
       }
     }
+  }
+
+  private execute(stmt: Stmt) {
+    stmt.accept(this);
+  }
+
+  public visitExpressionExpr(stmt: Expression) {
+    this.evaluate(stmt.expression);
+    return;
+  }
+
+  public visitPrintExpr(stmt: Print) {
+    const value = this.evaluate(stmt.expression);
+    console.log(stringify(value));
+    return null;
   }
 
   public visitLiteralExpr(expr: Literal) {

@@ -1,4 +1,4 @@
-import { Expr } from "./expr";
+import { Expr, Stmt } from "./ast";
 import { Token, TokenType } from "./token";
 
 export class Parser {
@@ -15,11 +15,30 @@ export class Parser {
   }
 
   public parse() {
-    try {
-      return this.expression();
-    } catch {
-      return null;
+    const statements: Stmt[] = [];
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
     }
+    return statements;
+  }
+
+  private statement() {
+    if (this.match(TokenType.PRINT)) {
+      return this.printStatement();
+    }
+    return this.expressionStatement();
+  }
+
+  private printStatement() {
+    const value = this.expression();
+    this.consume(TokenType.SEMICOLON, "Expect ';' after value.");
+    return new Stmt.Print(value);
+  }
+
+  private expressionStatement() {
+    const expr = this.expression();
+    this.consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+    return new Stmt.Expression(expr);
   }
 
   private expression() {

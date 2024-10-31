@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { ASTPrinter } from "../src/ast-printer";
-import { Expr } from "../src/expr";
+import { Expr } from "../src/ast";
 import { Token, TokenType } from "../src/token";
 
 describe("ast-printer", function () {
