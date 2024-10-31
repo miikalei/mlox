@@ -6,7 +6,15 @@ interface Visitable<Visitor> {
 
 export type Value = object | string | number | boolean | null;
 export type Expr = Assign | Literal | Unary | Binary | Grouping | Variable;
-export type Stmt = Expression | Print | Var;
+export type Stmt = Block | Expression | Print | Var;
+
+export class Block implements Visitable<StmtVisitor> {
+  constructor(public statements: Stmt[]) {}
+
+  public accept<R>(visitor: StmtVisitor<R>) {
+    return visitor.visitBlockStmt(this);
+  }
+}
 
 export class Expression implements Visitable<StmtVisitor> {
   constructor(public expression: Expr) {}
@@ -103,6 +111,7 @@ export const Expr = {
 } as const;
 
 export const Stmt = {
+  Block,
   Expression,
   Print,
   Var,
@@ -118,6 +127,7 @@ export type ExprVisitor<R = unknown> = {
 };
 
 export type StmtVisitor<R = unknown> = {
+  visitBlockStmt: (stmt: Block) => R;
   visitExpressionStmt: (stmt: Expression) => R;
   visitPrintStmt: (stmt: Print) => R;
   visitVarStmt: (stmt: Var) => R;

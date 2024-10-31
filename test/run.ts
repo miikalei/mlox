@@ -41,4 +41,38 @@ describe("Running source", () => {
     new Run().run(`var a = 5; a=3; print a;`);
     assert(spy.calledWith("3"));
   });
+
+  it("Supports scoping", function () {
+    new Run().run(`
+      var a = "global a";
+      var b = "global b";
+      var c = "global c";
+        {
+        var a = "outer a";
+        var b = "outer b";
+          {
+          var a = "inner a";
+          print a;
+          print b;
+          print c;
+          }
+        print a;
+        print b;
+        print c;
+        }
+      print a;
+      print b;
+      print c;
+      `);
+    const logs = spy.getCalls();
+    assert(logs[0].calledWith("inner a"));
+    assert(logs[1].calledWith("outer b"));
+    assert(logs[2].calledWith("global c"));
+    assert(logs[3].calledWith("outer a"));
+    assert(logs[4].calledWith("outer b"));
+    assert(logs[5].calledWith("global c"));
+    assert(logs[6].calledWith("global a"));
+    assert(logs[7].calledWith("global b"));
+    assert(logs[8].calledWith("global c"));
+  });
 });

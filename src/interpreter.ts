@@ -13,6 +13,7 @@ import type {
   Var,
   Variable,
   Assign,
+  Block,
 } from "./ast";
 import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
@@ -62,6 +63,24 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
     return null;
+  }
+
+  public visitBlockStmt(stmt: Block) {
+    this.executeBlock(stmt.statements, new Environment(this.environment));
+    return null;
+  }
+
+  private executeBlock(statements: Stmt[], environment: Environment) {
+    const previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (const stmt of statements) {
+        this.execute(stmt);
+      }
+    } finally {
+      this.environment = previous;
+    }
   }
 
   public visitAssignExpr(expr: Assign) {

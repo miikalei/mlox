@@ -3,11 +3,19 @@ import { RuntimeError } from "./interpreter";
 import { Token } from "./token";
 
 export class Environment {
+  enclosing: Environment | null;
   values: Map<string, Value> = new Map();
 
-  public get(name: Token) {
+  constructor(enclosing?: Environment) {
+    this.enclosing = enclosing ?? null;
+  }
+
+  public get(name: Token): Value {
     if (this.values.has(name.lexeme)) {
       return this.values.get(name.lexeme)!;
+    }
+    if (this.enclosing !== null) {
+      return this.enclosing.get(name);
     }
 
     throw new RuntimeError(name, `Undefined variable '${name.lexeme}'.`);
@@ -20,6 +28,11 @@ export class Environment {
   public assign(name: Token, value: Value) {
     if (this.values.has(name.lexeme)) {
       this.values.set(name.lexeme, value);
+      return;
+    }
+
+    if (this.enclosing !== null) {
+      this.enclosing.assign(name, value);
       return;
     }
 
