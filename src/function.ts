@@ -5,7 +5,10 @@ import { Interpreter } from "./interpreter";
 import { ReturnSignal } from "./return";
 
 export class MloxFunction implements Callable {
-  constructor(private declaration: Function) {}
+  constructor(
+    private declaration: Function,
+    private closure: Environment,
+  ) {}
 
   get arity() {
     return this.declaration.params.length;
@@ -16,7 +19,7 @@ export class MloxFunction implements Callable {
   }
 
   public call(interpreter: Interpreter, args: Value[]) {
-    const environment = new Environment(interpreter.globals);
+    const environment = new Environment(this.closure);
     for (let i = 0; i < this.declaration.params.length; i++) {
       environment.define(this.declaration.params[i].lexeme, args[i]);
     }

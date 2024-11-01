@@ -77,7 +77,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   }
 
   public visitFunctionStmt(stmt: Function) {
-    const fun = new MloxFunction(stmt);
+    const fun = new MloxFunction(stmt, this.environment);
     this.environment.define(stmt.name.lexeme, fun);
     return null;
   }

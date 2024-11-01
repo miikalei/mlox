@@ -133,4 +133,22 @@ describe("Running source", () => {
     assert(spy.callCount === 20);
     assert(spy.getCall(19).calledWith("4181"));
   });
+
+  it("supports closures", function () {
+    new Run().run(`
+      fun makeCounter() {
+        var i = 0;
+        fun count() {
+          i = i + 1;
+          print i;
+        }
+        return count;
+      }
+      var counter = makeCounter();
+      counter(); // "1".
+      counter(); // "2".
+`);
+    assert(spy.getCall(0).calledWith("1"));
+    assert(spy.getCall(1).calledWith("2"));
+  });
 });
