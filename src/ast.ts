@@ -15,7 +15,15 @@ export type Expr =
   | Binary
   | Grouping
   | Variable;
-export type Stmt = Block | Function | If | Expression | Print | Var | While;
+export type Stmt =
+  | Block
+  | Function
+  | If
+  | Expression
+  | Print
+  | Return
+  | Var
+  | While;
 
 export class Block implements Visitable<StmtVisitor> {
   constructor(public statements: Stmt[]) {}
@@ -62,6 +70,17 @@ export class Print implements Visitable<StmtVisitor> {
 
   public accept<R>(visitor: StmtVisitor<R>) {
     return visitor.visitPrintStmt(this);
+  }
+}
+
+export class Return implements Visitable<StmtVisitor> {
+  constructor(
+    public keyword: Token,
+    public value: Expr | null,
+  ) {}
+
+  public accept<R>(visitor: StmtVisitor<R>) {
+    return visitor.visitReturnStmt(this);
   }
 }
 
@@ -186,6 +205,7 @@ export const Stmt = {
   If,
   Expression,
   Print,
+  Return,
   Var,
   While,
 };
@@ -207,6 +227,7 @@ export type StmtVisitor<R = unknown> = {
   visitIfStmt: (stmt: If) => R;
   visitExpressionStmt: (stmt: Expression) => R;
   visitPrintStmt: (stmt: Print) => R;
+  visitReturnStmt: (stmt: Return) => R;
   visitVarStmt: (stmt: Var) => R;
   visitWhileStmt: (stmt: While) => R;
 };

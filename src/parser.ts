@@ -85,6 +85,9 @@ export class Parser {
     if (this.match(TokenType.PRINT)) {
       return this.printStatement();
     }
+    if (this.match(TokenType.RETURN)) {
+      return this.returnStatement();
+    }
     if (this.match(TokenType.LEFT_BRACE)) {
       return new Stmt.Block(this.block());
     }
@@ -172,6 +175,17 @@ export class Parser {
     const value = this.expression();
     this.consume(TokenType.SEMICOLON, "Expect ';' after value.");
     return new Stmt.Print(value);
+  }
+
+  private returnStatement() {
+    const keyword = this.previous();
+    let value: Expr | null = null;
+    if (!this.check(TokenType.SEMICOLON)) {
+      value = this.expression();
+    }
+
+    this.consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+    return new Stmt.Return(keyword, value);
   }
 
   private expressionStatement() {

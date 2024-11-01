@@ -2,6 +2,7 @@ import { Function, Value } from "./ast";
 import { Callable } from "./callable";
 import { Environment } from "./environment";
 import { Interpreter } from "./interpreter";
+import { ReturnSignal } from "./return";
 
 export class MloxFunction implements Callable {
   constructor(private declaration: Function) {}
@@ -20,7 +21,14 @@ export class MloxFunction implements Callable {
       environment.define(this.declaration.params[i].lexeme, args[i]);
     }
 
-    interpreter.executeBlock(this.declaration.body, environment);
+    try {
+      interpreter.executeBlock(this.declaration.body, environment);
+    } catch (err: unknown) {
+      if (err instanceof ReturnSignal) {
+        return err.value;
+      }
+      throw err;
+    }
     return null;
   }
 }

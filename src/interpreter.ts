@@ -19,10 +19,12 @@ import type {
   While,
   Call,
   Function,
+  Return,
 } from "./ast";
 import { Callable, isCallable } from "./callable";
 import { Environment } from "./environment";
 import { MloxFunction } from "./function";
+import { ReturnSignal } from "./return";
 import { Token, TokenType } from "./token";
 
 export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
@@ -100,6 +102,14 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
     return null;
+  }
+
+  public visitReturnStmt(stmt: Return) {
+    let value: Value = null;
+    if (stmt.value !== null) {
+      value = this.evaluate(stmt.value);
+    }
+    throw new ReturnSignal(value);
   }
 
   public visitBlockStmt(stmt: Block) {

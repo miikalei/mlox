@@ -117,4 +117,20 @@ describe("Running source", () => {
     new Run().run(`print clock();`);
     assert(spy.calledOnce);
   });
+
+  it("Supports recursion", function () {
+    this.timeout(5000);
+    new Run().run(`
+      fun fib(n) {
+        if (n <= 1) return n;
+        return fib(n - 2) + fib(n - 1);
+      }
+      
+      for (var i = 0; i < 20; i = i + 1) {
+        print fib(i);
+      }
+      `);
+    assert(spy.callCount === 20);
+    assert(spy.getCall(19).calledWith("4181"));
+  });
 });
