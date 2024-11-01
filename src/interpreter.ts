@@ -18,9 +18,11 @@ import type {
   Logical,
   While,
   Call,
+  Function,
 } from "./ast";
-import { Callable } from "./callable";
+import { Callable, isCallable } from "./callable";
 import { Environment } from "./environment";
+import { MloxFunction } from "./function";
 import { Token, TokenType } from "./token";
 
 export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
@@ -72,6 +74,12 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     return;
   }
 
+  public visitFunctionStmt(stmt: Function) {
+    const fun = new MloxFunction(stmt);
+    this.environment.define(stmt.name.lexeme, fun);
+    return null;
+  }
+
   public visitIfStmt(stmt: If) {
     if (this.isTruthy(this.evaluate(stmt.condition))) {
       this.execute(stmt.thenBranch);
@@ -99,7 +107,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     return null;
   }
 
-  private executeBlock(statements: Stmt[], environment: Environment) {
+  public executeBlock(statements: Stmt[], environment: Environment) {
     const previous = this.environment;
     try {
       this.environment = environment;
@@ -208,7 +216,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
       argValues.push(this.evaluate(arg));
     }
 
-    if (!(callee instanceof Callable)) {
+    if (!isCallable(callee)) {
       throw new RuntimeError(
         expr.paren,
         "Can only call functions and classes.",

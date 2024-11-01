@@ -1,0 +1,26 @@
+import { Function, Value } from "./ast";
+import { Callable } from "./callable";
+import { Environment } from "./environment";
+import { Interpreter } from "./interpreter";
+
+export class MloxFunction implements Callable {
+  constructor(private declaration: Function) {}
+
+  get arity() {
+    return this.declaration.params.length;
+  }
+
+  get name() {
+    return `<fn ${this.declaration.name.lexeme}>`;
+  }
+
+  public call(interpreter: Interpreter, args: Value[]) {
+    const environment = new Environment(interpreter.globals);
+    for (let i = 0; i < this.declaration.params.length; i++) {
+      environment.define(this.declaration.params[i].lexeme, args[i]);
+    }
+
+    interpreter.executeBlock(this.declaration.body, environment);
+    return null;
+  }
+}

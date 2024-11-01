@@ -17,3 +17,7 @@ export class Callable {
     this.call = call;
   }
 }
+
+export function isCallable(value: Value) {
+  return typeof value === "object" && value !== null && "name" in value;
+}

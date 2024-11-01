@@ -102,4 +102,19 @@ describe("Running source", () => {
  `);
     assert(spy.getCalls().length === 21);
   });
+
+  it("supports functions", function () {
+    new Run().run(`
+      fun sayHi(first, last) {
+        print "Hi, " + first + " " + last + "!";
+      }
+      sayHi("Dear", "Reader");
+      `);
+    assert(spy.calledOnceWith("Hi, Dear Reader!"));
+  });
+
+  it("has builtin 'clock'", function () {
+    new Run().run(`print clock();`);
+    assert(spy.calledOnce);
+  });
 });
