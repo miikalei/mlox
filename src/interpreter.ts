@@ -17,16 +17,26 @@ import type {
   If,
   Logical,
   While,
+  Call,
 } from "./ast";
+import { Callable } from "./callable";
 import { Environment } from "./environment";
 import { Token, TokenType } from "./token";
 
 export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
-  environment = new Environment();
+  globals = new Environment(); // Outermost scope
+  environment = this.globals; // Current env, changes with scope
   reportError?: (error: RuntimeError) => void;
 
   constructor(reportError?: (error: RuntimeError) => void) {
     this.reportError = reportError;
+
+    this.globals.define(
+      "clock",
+      new Callable("<native fn>", 0, () => {
+        return new Date().getTime() / 1_000;
+      }),
+    );
   }
 
   public interpret(statements: Stmt[]) {
@@ -188,6 +198,33 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     }
     // Unreachable
     return null;
+  }
+
+  public visitCallExpr(expr: Call) {
+    const callee = this.evaluate(expr.callee);
+
+    const argValues: Value[] = [];
+    for (const arg of expr.args) {
+      argValues.push(this.evaluate(arg));
+    }
+
+    if (!(callee instanceof Callable)) {
+      throw new RuntimeError(
+        expr.paren,
+        "Can only call functions and classes.",
+      );
+    }
+
+    const fun = callee;
+
+    if (argValues.length !== fun.arity) {
+      throw new RuntimeError(
+        expr.paren,
+        `Expected ${fun.arity} arguments but got ${argValues.length}.`,
+      );
+    }
+
+    return fun.call(this, argValues);
   }
 
   public visitVariableExpr(expr: Variable) {

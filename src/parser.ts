@@ -232,12 +232,12 @@ export class Parser {
   }
 
   private term() {
-    const expr = this.factor();
+    let expr = this.factor();
 
     while (this.match(TokenType.MINUS, TokenType.PLUS)) {
       const operator = this.previous();
       const right = this.factor();
-      return new Expr.Binary(expr, operator, right);
+      expr = new Expr.Binary(expr, operator, right);
     }
     return expr;
   }
@@ -260,7 +260,40 @@ export class Parser {
       const right = this.unary();
       return new Expr.Unary(operator, right);
     }
-    return this.primary();
+    return this.call();
+  }
+
+  private call(): Expr {
+    let expr: Expr = this.primary();
+
+    while (true) {
+      if (this.match(TokenType.LEFT_PAREN)) {
+        expr = this.finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
+  }
+
+  private finishCall(callee: Expr) {
+    const args: Expr[] = [];
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (args.length >= 255) {
+          this.error(this.peek(), "Can't have more than 255 arguments.");
+        }
+        args.push(this.expression());
+      } while (this.match(TokenType.COMMA));
+    }
+
+    const paren = this.consume(
+      TokenType.RIGHT_PAREN,
+      "Expect ')' after arguments.",
+    );
+
+    return new Expr.Call(callee, paren, args);
   }
 
   private primary() {

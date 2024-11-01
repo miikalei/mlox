@@ -1,0 +1,19 @@
+import { Value } from "./ast";
+import { Interpreter } from "./interpreter";
+
+export class Callable {
+  name: string;
+  arity: number;
+
+  call: (interpreter: Interpreter, args: Value[]) => Value;
+
+  constructor(
+    name: string,
+    arity: number,
+    call: (interpreter: Interpreter, args: Value[]) => Value,
+  ) {
+    this.name = name;
+    this.arity = arity;
+    this.call = call;
+  }
+}

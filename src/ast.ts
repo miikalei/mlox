@@ -1,15 +1,17 @@
+import { Callable } from "./callable";
 import { Token } from "./token";
 
 interface Visitable<Visitor> {
   accept: (visitor: Visitor) => unknown;
 }
 
-export type Value = object | string | number | boolean | null;
+export type Value = object | string | number | boolean | Callable | null;
 export type Expr =
   | Assign
   | Literal
   | Unary
   | Logical
+  | Call
   | Binary
   | Grouping
   | Variable;
@@ -108,6 +110,18 @@ export class Binary implements Visitable<ExprVisitor> {
   }
 }
 
+export class Call implements Visitable<ExprVisitor> {
+  constructor(
+    public callee: Expr,
+    public paren: Token,
+    public args: Expr[],
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitCallExpr(this);
+  }
+}
+
 export class Grouping implements Visitable<ExprVisitor> {
   constructor(public expression: Expr) {}
 
@@ -145,6 +159,7 @@ export class Unary implements Visitable<ExprVisitor> {
 
 export const Expr = {
   Assign,
+  Call,
   Logical,
   Binary,
   Grouping,
@@ -165,6 +180,7 @@ export const Stmt = {
 export type ExprVisitor<R = unknown> = {
   visitAssignExpr: (expr: Assign) => R;
   visitLogicalExpr: (expr: Logical) => R;
+  visitCallExpr: (expr: Call) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
   visitUnaryExpr: (expr: Unary) => R;
