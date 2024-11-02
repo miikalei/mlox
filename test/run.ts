@@ -190,4 +190,17 @@ describe("Running source", () => {
       `);
     assert(spy.calledOnceWith("Bagel instance"));
   });
+
+  it("Supports class methods", function () {
+    new Run().run(`
+      class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+Bacon().eat(); // Prints "Crunch crunch crunch!".
+`);
+    assert(spy.calledOnceWith("Crunch crunch crunch!"));
+  });
 });

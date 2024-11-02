@@ -21,11 +21,14 @@ import type {
   Function,
   Return,
   Class,
+  Get,
+  Set,
 } from "./ast";
 import { Callable, isCallable } from "./callable";
 import { MloxClass } from "./class";
 import { Environment } from "./environment";
 import { MloxFunction } from "./function";
+import { MloxInstance } from "./instance";
 import { ReturnSignal } from "./return";
 import { Token, TokenType } from "./token";
 
@@ -70,7 +73,14 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   public visitClassStmt(stmt: Class) {
     this.environment.define(stmt.name.lexeme, null);
-    const klass = new MloxClass(stmt.name.lexeme);
+
+    const methods: Map<string, MloxFunction> = new Map();
+    for (const method of stmt.methods) {
+      const fun = new MloxFunction(method, this.environment);
+      methods.set(method.name.lexeme, fun);
+    }
+
+    const klass = new MloxClass(stmt.name.lexeme, methods);
     this.environment.assign(stmt.name, klass);
     return null;
   }
@@ -154,6 +164,26 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
       this.globals.assign(expr.name, value);
     }
 
+    return value;
+  }
+
+  public visitGetExpr(expr: Get) {
+    const obj = this.evaluate(expr.obj);
+    if (obj instanceof MloxInstance) {
+      return obj.get(expr.name);
+    }
+    throw new RuntimeError(expr.name, "Only instances have properties.");
+  }
+
+  public visitSetExpr(expr: Set) {
+    const obj = this.evaluate(expr.obj);
+
+    if (!(obj instanceof MloxInstance)) {
+      throw new RuntimeError(expr.name, "Only instances have fields.");
+    }
+
+    const value = this.evaluate(expr.value);
+    obj.set(expr.name, value);
     return value;
   }
 

@@ -16,6 +16,8 @@ export type Value =
   | MloxClass;
 export type Expr =
   | Assign
+  | Get
+  | Set
   | Literal
   | Unary
   | Logical
@@ -126,6 +128,8 @@ export class While implements Visitable<StmtVisitor> {
   }
 }
 
+// EXPRs:
+
 export class Assign implements Visitable<ExprVisitor> {
   constructor(
     public name: Token,
@@ -134,6 +138,29 @@ export class Assign implements Visitable<ExprVisitor> {
 
   public accept<R>(visitor: ExprVisitor<R>) {
     return visitor.visitAssignExpr(this);
+  }
+}
+
+export class Get implements Visitable<ExprVisitor> {
+  constructor(
+    public obj: Expr,
+    public name: Token,
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitGetExpr(this);
+  }
+}
+
+export class Set implements Visitable<ExprVisitor> {
+  constructor(
+    public obj: Expr,
+    public name: Token,
+    public value: Expr,
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitSetExpr(this);
   }
 }
 
@@ -211,6 +238,8 @@ export class Unary implements Visitable<ExprVisitor> {
 export const Expr = {
   Assign,
   Call,
+  Get,
+  Set,
   Logical,
   Binary,
   Grouping,
@@ -235,6 +264,8 @@ export type ExprVisitor<R = unknown> = {
   visitAssignExpr: (expr: Assign) => R;
   visitLogicalExpr: (expr: Logical) => R;
   visitCallExpr: (expr: Call) => R;
+  visitGetExpr: (expr: Get) => R;
+  visitSetExpr: (expr: Set) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
   visitUnaryExpr: (expr: Unary) => R;

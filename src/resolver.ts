@@ -8,11 +8,13 @@ import {
   Expression,
   ExprVisitor,
   Function,
+  Get,
   Grouping,
   If,
   Logical,
   Print,
   Return,
+  Set,
   Stmt,
   StmtVisitor,
   Unary,
@@ -26,6 +28,7 @@ import { Token } from "./token";
 enum FunctionType {
   NONE,
   FUNCTION,
+  METHOD,
 }
 
 /**
@@ -137,6 +140,15 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolveLocal(expr, expr.name);
   }
 
+  public visitGetExpr(expr: Get) {
+    this.resolve(expr.obj);
+  }
+
+  public visitSetExpr(expr: Set) {
+    this.resolve(expr.value);
+    this.resolve(expr.obj);
+  }
+
   public visitAssignExpr(expr: Assign) {
     this.resolve(expr.value);
     this.resolveLocal(expr, expr.name);
@@ -153,6 +165,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   public visitClassStmt(stmt: Class) {
     this.declare(stmt.name);
     this.define(stmt.name);
+
+    for (const method of stmt.methods) {
+      this.resolveFunction(method, FunctionType.METHOD);
+    }
   }
   public visitExpressionStmt(stmt: Expression) {
     this.resolve(stmt.expression);
