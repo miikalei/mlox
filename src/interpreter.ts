@@ -23,6 +23,7 @@ import type {
   Class,
   Get,
   Set,
+  This,
 } from "./ast";
 import { Callable, isCallable } from "./callable";
 import { MloxClass } from "./class";
@@ -126,6 +127,10 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
     const value = this.evaluate(stmt.expression);
     console.log(stringify(value));
     return null;
+  }
+
+  public visitThisExpr(expr: This) {
+    return this.lookUpVariable(expr.keyword, expr);
   }
 
   public visitReturnStmt(stmt: Return) {

@@ -1,6 +1,7 @@
 import { Function, Value } from "./ast";
 import { Callable } from "./callable";
 import { Environment } from "./environment";
+import { MloxInstance } from "./instance";
 import { Interpreter } from "./interpreter";
 import { ReturnSignal } from "./return";
 
@@ -33,5 +34,11 @@ export class MloxFunction implements Callable {
       throw err;
     }
     return null;
+  }
+
+  public bind(instance: MloxInstance) {
+    const environment = new Environment(this.closure);
+    environment.define("this", instance);
+    return new MloxFunction(this.declaration, environment);
   }
 }

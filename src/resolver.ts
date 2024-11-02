@@ -17,6 +17,7 @@ import {
   Set,
   Stmt,
   StmtVisitor,
+  This,
   Unary,
   Var,
   Variable,
@@ -166,9 +167,14 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.declare(stmt.name);
     this.define(stmt.name);
 
+    this.beginScope();
+    this.scopes[this.scopes.length - 1].set("this", true);
+
     for (const method of stmt.methods) {
       this.resolveFunction(method, FunctionType.METHOD);
     }
+
+    this.endScope();
   }
   public visitExpressionStmt(stmt: Expression) {
     this.resolve(stmt.expression);
@@ -204,6 +210,9 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     for (const arg of expr.args) {
       this.resolve(arg);
     }
+  }
+  public visitThisExpr(expr: This) {
+    this.resolveLocal(expr, expr.keyword);
   }
   public visitGroupingExpr(expr: Grouping) {
     this.resolve(expr.expression);

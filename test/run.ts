@@ -203,4 +203,20 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
 `);
     assert(spy.calledOnceWith("Crunch crunch crunch!"));
   });
+
+  it("Support 'this'", function () {
+    new Run().run(`
+        class Cake {
+          taste() {
+            var adjective = "delicious";
+            print "The " + this.flavor + " cake is " + adjective + "!";
+          }
+        }   
+
+        var cake = Cake();
+        cake.flavor = "German chocolate";
+        cake.taste(); // Prints "The German chocolate cake is delicious!".
+      `);
+    assert(spy.calledOnceWith("The German chocolate cake is delicious!"));
+  });
 });

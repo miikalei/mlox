@@ -18,6 +18,7 @@ export type Expr =
   | Assign
   | Get
   | Set
+  | This
   | Literal
   | Unary
   | Logical
@@ -164,6 +165,14 @@ export class Set implements Visitable<ExprVisitor> {
   }
 }
 
+export class This implements Visitable<ExprVisitor> {
+  constructor(public keyword: Token) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitThisExpr(this);
+  }
+}
+
 export class Logical implements Visitable<ExprVisitor> {
   constructor(
     public left: Expr,
@@ -240,6 +249,7 @@ export const Expr = {
   Call,
   Get,
   Set,
+  This,
   Logical,
   Binary,
   Grouping,
@@ -266,6 +276,7 @@ export type ExprVisitor<R = unknown> = {
   visitCallExpr: (expr: Call) => R;
   visitGetExpr: (expr: Get) => R;
   visitSetExpr: (expr: Set) => R;
+  visitThisExpr: (expr: This) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;
   visitUnaryExpr: (expr: Unary) => R;
