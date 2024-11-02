@@ -181,4 +181,13 @@ describe("Running source", () => {
       `);
     assert(spy.calledOnceWith("Animal"));
   });
+
+  it("supports class instances", function () {
+    new Run().run(`
+        class Bagel {}
+        var bagel = Bagel();
+        print bagel; // Prints "Bagel instance".
+      `);
+    assert(spy.calledOnceWith("Bagel instance"));
+  });
 });
