@@ -4,11 +4,11 @@ import { Token, TokenType } from "./token";
 export class Parser {
   tokens: Token[];
   current = 0;
-  reportError?: (line: number, where: string, message: string) => void;
+  reportError?: (token: Token, message: string) => void;
 
   constructor(
     tokens: Token[],
-    reportError?: (line: number, where: string, message: string) => void,
+    reportError?: (token: Token, message: string) => void,
   ) {
     this.tokens = tokens;
     this.reportError = reportError;
@@ -407,11 +407,7 @@ export class Parser {
   }
 
   private error(token: Token, message: string) {
-    if (token.tokenType === TokenType.EOF) {
-      this.reportError?.(token.line, " at end", message);
-    } else {
-      this.reportError?.(token.line, ` at '${token.lexeme}'`, message);
-    }
+    this.reportError?.(token, message);
     return new ParseError();
   }
 

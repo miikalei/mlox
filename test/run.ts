@@ -151,4 +151,21 @@ describe("Running source", () => {
     assert(spy.getCall(0).calledWith("1"));
     assert(spy.getCall(1).calledWith("2"));
   });
+
+  it("supports static scoping", function () {
+    new Run().run(`
+        var a = "global";
+        {
+          fun showA() {
+            print a; // Locally scoped
+          }
+
+          showA();
+          var a = "block";
+          showA();
+        }
+      `);
+    assert(spy.getCall(0).calledWith("global"));
+    assert(spy.getCall(1).calledWith("global"));
+  });
 });

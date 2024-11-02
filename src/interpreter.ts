@@ -30,6 +30,7 @@ import { Token, TokenType } from "./token";
 export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   globals = new Environment(); // Outermost scope
   environment = this.globals; // Current env, changes with scope
+  locals = new Map<Expr, number>();
   reportError?: (error: RuntimeError) => void;
 
   constructor(reportError?: (error: RuntimeError) => void) {
@@ -59,6 +60,10 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   private execute(stmt: Stmt) {
     stmt.accept(this);
+  }
+
+  public resolve(expr: Expr, depth: number) {
+    this.locals.set(expr, depth);
   }
 
   public visitVarStmt(stmt: Var) {
@@ -132,7 +137,14 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   public visitAssignExpr(expr: Assign) {
     const value = this.evaluate(expr.value);
-    this.environment.assign(expr.name, value);
+
+    const depth = this.locals.get(expr);
+    if (depth !== undefined) {
+      this.environment.assignAt(depth, expr.name, value);
+    } else {
+      this.globals.assign(expr.name, value);
+    }
+
     return value;
   }
 
@@ -246,7 +258,16 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   }
 
   public visitVariableExpr(expr: Variable) {
-    return this.environment.get(expr.name);
+    return this.lookUpVariable(expr.name, expr);
+  }
+
+  private lookUpVariable(name: Token, expr: Expr) {
+    const distance = this.locals.get(expr);
+    if (distance !== undefined) {
+      return this.environment.getAt(distance, name.lexeme);
+    } else {
+      return this.globals.get(name);
+    }
   }
 
   private evaluate(expr: Expr): Value {

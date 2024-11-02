@@ -1,3 +1,4 @@
+import assert from "assert";
 import { Value } from "./ast";
 import { RuntimeError } from "./interpreter";
 import { Token } from "./token";
@@ -19,6 +20,32 @@ export class Environment {
     }
 
     throw new RuntimeError(name, `Undefined variable '${name.lexeme}'.`);
+  }
+
+  public getAt(depth: number, name: string): Value {
+    const value = this.ancestor(depth).values.get(name);
+    assert(
+      value !== undefined,
+      "Unexpectedly found no value from the resolved scope.",
+    );
+    return value;
+  }
+
+  public assignAt(depth: number, name: Token, value: Value) {
+    this.ancestor(depth).values.set(name.lexeme, value);
+  }
+
+  private ancestor(depth: number) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let environment: Environment = this;
+    for (let i = 0; i < depth; i++) {
+      assert(
+        environment.enclosing !== null,
+        "Unexpected: resolved scope depth too high.",
+      );
+      environment = environment.enclosing;
+    }
+    return environment;
   }
 
   public define(name: string, value: Value) {
