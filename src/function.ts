@@ -9,6 +9,7 @@ export class MloxFunction implements Callable {
   constructor(
     private declaration: Function,
     private closure: Environment,
+    private isInitializer: boolean,
   ) {}
 
   get arity() {
@@ -29,9 +30,15 @@ export class MloxFunction implements Callable {
       interpreter.executeBlock(this.declaration.body, environment);
     } catch (err: unknown) {
       if (err instanceof ReturnSignal) {
+        if (this.isInitializer) {
+          return this.closure.getAt(0, "this");
+        }
         return err.value;
       }
       throw err;
+    }
+    if (this.isInitializer) {
+      return this.closure.getAt(0, "this");
     }
     return null;
   }
@@ -39,6 +46,6 @@ export class MloxFunction implements Callable {
   public bind(instance: MloxInstance) {
     const environment = new Environment(this.closure);
     environment.define("this", instance);
-    return new MloxFunction(this.declaration, environment);
+    return new MloxFunction(this.declaration, environment, this.isInitializer);
   }
 }

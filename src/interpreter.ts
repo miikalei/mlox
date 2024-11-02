@@ -77,7 +77,11 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
     const methods: Map<string, MloxFunction> = new Map();
     for (const method of stmt.methods) {
-      const fun = new MloxFunction(method, this.environment);
+      const fun = new MloxFunction(
+        method,
+        this.environment,
+        method.name.lexeme === "init",
+      );
       methods.set(method.name.lexeme, fun);
     }
 
@@ -102,7 +106,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   }
 
   public visitFunctionStmt(stmt: Function) {
-    const fun = new MloxFunction(stmt, this.environment);
+    const fun = new MloxFunction(stmt, this.environment, false);
     this.environment.define(stmt.name.lexeme, fun);
     return null;
   }

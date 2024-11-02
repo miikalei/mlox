@@ -219,4 +219,21 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
       `);
     assert(spy.calledOnceWith("The German chocolate cake is delicious!"));
   });
+
+  it("supports calling initializer from outside", function () {
+    new Run().run(`
+      class Foo {
+      init() {
+        print this;
+      }
+      }
+
+      var foo = Foo();
+      print foo.init();
+        `);
+    assert(spy.callCount === 3);
+    assert(spy.getCall(0).calledWith("Foo instance"));
+    assert(spy.getCall(1).calledWith("Foo instance"));
+    assert(spy.getCall(2).calledWith("Foo instance"));
+  });
 });
