@@ -20,8 +20,10 @@ import type {
   Call,
   Function,
   Return,
+  Class,
 } from "./ast";
 import { Callable, isCallable } from "./callable";
+import { MloxClass } from "./class";
 import { Environment } from "./environment";
 import { MloxFunction } from "./function";
 import { ReturnSignal } from "./return";
@@ -64,6 +66,13 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   public resolve(expr: Expr, depth: number) {
     this.locals.set(expr, depth);
+  }
+
+  public visitClassStmt(stmt: Class) {
+    this.environment.define(stmt.name.lexeme, null);
+    const klass = new MloxClass(stmt.name.lexeme);
+    this.environment.assign(stmt.name, klass);
+    return null;
   }
 
   public visitVarStmt(stmt: Var) {

@@ -3,6 +3,7 @@ import {
   Binary,
   Block,
   Call,
+  Class,
   Expr,
   Expression,
   ExprVisitor,
@@ -149,6 +150,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   // Trivial parts
+  public visitClassStmt(stmt: Class) {
+    this.declare(stmt.name);
+    this.define(stmt.name);
+  }
   public visitExpressionStmt(stmt: Expression) {
     this.resolve(stmt.expression);
   }

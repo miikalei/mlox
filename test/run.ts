@@ -168,4 +168,17 @@ describe("Running source", () => {
     assert(spy.getCall(0).calledWith("global"));
     assert(spy.getCall(1).calledWith("global"));
   });
+
+  it("supports class declarations", function () {
+    new Run().run(`
+      class Animal {
+        makeSound() {
+          return "Honk";
+        }
+      }
+
+      print Animal; // Prints "Animal".
+      `);
+    assert(spy.calledOnceWith("Animal"));
+  });
 });

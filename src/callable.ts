@@ -19,5 +19,5 @@ export class Callable {
 }
 
 export function isCallable(value: Value) {
-  return typeof value === "object" && value !== null && "name" in value;
+  return typeof value === "object" && value !== null && "arity" in value;
 }

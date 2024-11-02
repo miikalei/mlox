@@ -1,11 +1,19 @@
 import { Callable } from "./callable";
+import { MloxClass } from "./class";
 import { Token } from "./token";
 
 interface Visitable<Visitor> {
   accept: (visitor: Visitor) => unknown;
 }
 
-export type Value = object | string | number | boolean | Callable | null;
+export type Value =
+  | object
+  | string
+  | number
+  | boolean
+  | Callable
+  | null
+  | MloxClass;
 export type Expr =
   | Assign
   | Literal
@@ -17,6 +25,7 @@ export type Expr =
   | Variable;
 export type Stmt =
   | Block
+  | Class
   | Function
   | If
   | Expression
@@ -30,6 +39,17 @@ export class Block implements Visitable<StmtVisitor> {
 
   public accept<R>(visitor: StmtVisitor<R>) {
     return visitor.visitBlockStmt(this);
+  }
+}
+
+export class Class implements Visitable<StmtVisitor> {
+  constructor(
+    public name: Token,
+    public methods: Function[],
+  ) {}
+
+  public accept<R>(visitor: StmtVisitor<R>) {
+    return visitor.visitClassStmt(this);
   }
 }
 
@@ -201,6 +221,7 @@ export const Expr = {
 
 export const Stmt = {
   Block,
+  Class,
   Function,
   If,
   Expression,
@@ -223,6 +244,7 @@ export type ExprVisitor<R = unknown> = {
 
 export type StmtVisitor<R = unknown> = {
   visitBlockStmt: (stmt: Block) => R;
+  visitClassStmt: (stmt: Class) => R;
   visitFunctionStmt: (stmt: Function) => R;
   visitIfStmt: (stmt: If) => R;
   visitExpressionStmt: (stmt: Expression) => R;

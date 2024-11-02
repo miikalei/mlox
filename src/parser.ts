@@ -1,4 +1,4 @@
-import { Expr, Stmt } from "./ast";
+import { Expr, Function, Stmt } from "./ast";
 import { Token, TokenType } from "./token";
 
 export class Parser {
@@ -27,6 +27,9 @@ export class Parser {
 
   private declaration() {
     try {
+      if (this.match(TokenType.CLASS)) {
+        return this.classDeclaration();
+      }
       if (this.match(TokenType.FUN)) {
         return this.funDeclaration("function");
       }
@@ -41,7 +44,20 @@ export class Parser {
     }
   }
 
-  private funDeclaration(kind: "function") {
+  private classDeclaration() {
+    const name = this.consume(TokenType.IDENTIFIER, "Expect class name.");
+    this.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+    const methods: Function[] = [];
+    while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+      methods.push(this.funDeclaration("method"));
+    }
+    this.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+    return new Stmt.Class(name, methods);
+  }
+
+  private funDeclaration(kind: "function" | "method") {
     const name = this.consume(TokenType.IDENTIFIER, `Expect ${kind} name.`);
     this.consume(TokenType.LEFT_PAREN, `Expect '(' after ${kind} name.`);
     const params: Token[] = [];
