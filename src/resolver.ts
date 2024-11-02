@@ -32,6 +32,11 @@ enum FunctionType {
   METHOD,
 }
 
+enum ClassType {
+  NONE,
+  CLASS,
+}
+
 /**
  * Static analysis AST walker, which for each variable usage, tells the interpreter
  * how many scopes up the variable is defined (by calling interpreter.resolve()).
@@ -41,6 +46,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   // but still under initialization. True means ready.
   private scopes: Array<Map<string, boolean>> = [];
   private currentFunction: FunctionType = FunctionType.NONE;
+  private currentClass: ClassType = ClassType.NONE;
 
   constructor(
     public interpreter: Interpreter,
@@ -164,6 +170,9 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
   // Trivial parts
   public visitClassStmt(stmt: Class) {
+    const enclosingClassType = this.currentClass;
+    this.currentClass = ClassType.CLASS;
+
     this.declare(stmt.name);
     this.define(stmt.name);
 
@@ -175,6 +184,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     this.endScope();
+    this.currentClass = enclosingClassType;
   }
   public visitExpressionStmt(stmt: Expression) {
     this.resolve(stmt.expression);
@@ -212,6 +222,9 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
   }
   public visitThisExpr(expr: This) {
+    if (this.currentClass === ClassType.NONE) {
+      this.reportError?.(expr.keyword, "Can't use 'this' outside of a class.");
+    }
     this.resolveLocal(expr, expr.keyword);
   }
   public visitGroupingExpr(expr: Grouping) {
