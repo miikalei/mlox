@@ -236,4 +236,19 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
     assert(spy.getCall(1).calledWith("Foo instance"));
     assert(spy.getCall(2).calledWith("Foo instance"));
   });
+
+  it("supports inherited methods", function () {
+    new Run().run(`
+      class Doughnut {
+        cook() {
+          print "Fry until golden brown.";
+        }
+      }
+
+      class BostonCream < Doughnut {}
+
+      BostonCream().cook();
+      `);
+    assert(spy.calledOnceWith("Fry until golden brown."));
+  });
 });

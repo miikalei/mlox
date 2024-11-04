@@ -48,6 +48,7 @@ export class Block implements Visitable<StmtVisitor> {
 export class Class implements Visitable<StmtVisitor> {
   constructor(
     public name: Token,
+    public superclass: Variable | null,
     public methods: Function[],
   ) {}
 

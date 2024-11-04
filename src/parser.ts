@@ -1,4 +1,4 @@
-import { Expr, Function, Stmt } from "./ast";
+import { Expr, Function, Stmt, Variable } from "./ast";
 import { Token, TokenType } from "./token";
 
 export class Parser {
@@ -46,6 +46,13 @@ export class Parser {
 
   private classDeclaration() {
     const name = this.consume(TokenType.IDENTIFIER, "Expect class name.");
+
+    let superClass: Variable | null = null;
+    if (this.match(TokenType.LESS)) {
+      this.consume(TokenType.IDENTIFIER, "Expect superclass name.");
+      superClass = new Expr.Variable(this.previous());
+    }
+
     this.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
     const methods: Function[] = [];
@@ -54,7 +61,7 @@ export class Parser {
     }
     this.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-    return new Stmt.Class(name, methods);
+    return new Stmt.Class(name, superClass, methods);
   }
 
   private funDeclaration(kind: "function" | "method") {

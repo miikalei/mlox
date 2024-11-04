@@ -10,6 +10,7 @@ export class MloxClass implements Callable {
 
   constructor(
     public name: string,
+    public superclass: MloxClass | null,
     methods: Map<string, MloxFunction>,
   ) {
     this.methods = methods;
@@ -28,8 +29,16 @@ export class MloxClass implements Callable {
     return instance;
   }
 
-  public findMethod(name: string) {
-    return this.methods.get(name);
+  public findMethod(name: string): MloxFunction | undefined {
+    const localMethod = this.methods.get(name);
+    if (localMethod) {
+      return localMethod;
+    }
+
+    if (this.superclass) {
+      return this.superclass.findMethod(name);
+    }
+    return undefined;
   }
 
   toString() {

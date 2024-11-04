@@ -73,6 +73,17 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   }
 
   public visitClassStmt(stmt: Class) {
+    let superClass: Value | null = null;
+    if (stmt.superclass !== null) {
+      superClass = this.evaluate(stmt.superclass);
+      if (!(superClass instanceof MloxClass)) {
+        throw new RuntimeError(
+          stmt.superclass.name,
+          "Superclass must be a class.",
+        );
+      }
+    }
+
     this.environment.define(stmt.name.lexeme, null);
 
     const methods: Map<string, MloxFunction> = new Map();
@@ -85,7 +96,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
       methods.set(method.name.lexeme, fun);
     }
 
-    const klass = new MloxClass(stmt.name.lexeme, methods);
+    const klass = new MloxClass(stmt.name.lexeme, superClass, methods);
     this.environment.assign(stmt.name, klass);
     return null;
   }
