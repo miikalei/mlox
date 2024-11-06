@@ -18,6 +18,7 @@ export type Expr =
   | Assign
   | Get
   | Set
+  | Super
   | This
   | Literal
   | Unary
@@ -166,6 +167,17 @@ export class Set implements Visitable<ExprVisitor> {
   }
 }
 
+export class Super implements Visitable<ExprVisitor> {
+  constructor(
+    public keyword: Token,
+    public method: Token,
+  ) {}
+
+  public accept<R>(visitor: ExprVisitor<R>) {
+    return visitor.visitSuperExpr(this);
+  }
+}
+
 export class This implements Visitable<ExprVisitor> {
   constructor(public keyword: Token) {}
 
@@ -250,6 +262,7 @@ export const Expr = {
   Call,
   Get,
   Set,
+  Super,
   This,
   Logical,
   Binary,
@@ -277,6 +290,7 @@ export type ExprVisitor<R = unknown> = {
   visitCallExpr: (expr: Call) => R;
   visitGetExpr: (expr: Get) => R;
   visitSetExpr: (expr: Set) => R;
+  visitSuperExpr: (expr: Super) => R;
   visitThisExpr: (expr: This) => R;
   visitBinaryExpr: (expr: Binary) => R;
   visitGroupingExpr: (expr: Grouping) => R;

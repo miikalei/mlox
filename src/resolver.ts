@@ -17,6 +17,7 @@ import {
   Set,
   Stmt,
   StmtVisitor,
+  Super,
   This,
   Unary,
   Var,
@@ -157,6 +158,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolve(expr.obj);
   }
 
+  public visitSuperExpr(expr: Super) {
+    this.resolveLocal(expr, expr.keyword);
+  }
+
   public visitAssignExpr(expr: Assign) {
     this.resolve(expr.value);
     this.resolveLocal(expr, expr.name);
@@ -169,7 +174,6 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolveFunction(stmt, FunctionType.FUNCTION);
   }
 
-  // Trivial parts
   public visitClassStmt(stmt: Class) {
     const enclosingClassType = this.currentClass;
     this.currentClass = ClassType.CLASS;
@@ -187,6 +191,11 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       this.resolve(stmt.superclass);
     }
 
+    if (stmt.superclass !== null) {
+      this.beginScope();
+      this.scopes[this.scopes.length - 1].set("super", true);
+    }
+
     this.beginScope();
     this.scopes[this.scopes.length - 1].set("this", true);
 
@@ -199,6 +208,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     this.endScope();
+
+    if (stmt.superclass !== null) {
+      this.endScope();
+    }
     this.currentClass = enclosingClassType;
   }
   public visitExpressionStmt(stmt: Expression) {

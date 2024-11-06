@@ -251,4 +251,55 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
       `);
     assert(spy.calledOnceWith("Fry until golden brown."));
   });
+
+  it("supports super keyword", function () {
+    new Run().run(`
+      class Doughnut {
+        cook() {
+          print "Fry until golden brown.";
+        }
+      }
+
+      class BostonCream < Doughnut {
+        cook() {
+          super.cook();
+          print "Pipe full of custard and coat with chocolate.";
+        }
+      }
+
+      BostonCream().cook();
+`);
+    assert(spy.callCount === 2);
+    assert(spy.getCall(0).calledWith("Fry until golden brown."));
+    assert(
+      spy
+        .getCall(1)
+        .calledWith("Pipe full of custard and coat with chocolate."),
+    );
+  });
+
+  it("looks up superclass with static scope", function () {
+    new Run().run(`
+        class A {
+          method() {
+            print "A method";
+          }
+        }
+
+        class B < A {
+          method() {
+            print "B method";
+          }
+
+          test() {
+            super.method();
+          }
+        }
+
+        class C < B {}
+
+        C().test();
+      `);
+    assert(spy.calledWith("A method"));
+  });
 });

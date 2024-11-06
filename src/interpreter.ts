@@ -1,3 +1,4 @@
+import assert from "assert";
 import type {
   Expr,
   Literal,
@@ -24,6 +25,7 @@ import type {
   Get,
   Set,
   This,
+  Super,
 } from "./ast";
 import { Callable, isCallable } from "./callable";
 import { MloxClass } from "./class";
@@ -86,6 +88,11 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
     this.environment.define(stmt.name.lexeme, null);
 
+    if (stmt.superclass !== null) {
+      this.environment = new Environment(this.environment);
+      this.environment.define("super", superClass);
+    }
+
     const methods: Map<string, MloxFunction> = new Map();
     for (const method of stmt.methods) {
       const fun = new MloxFunction(
@@ -98,7 +105,29 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
     const klass = new MloxClass(stmt.name.lexeme, superClass, methods);
     this.environment.assign(stmt.name, klass);
+
+    if (superClass !== null) {
+      this.environment = this.environment.enclosing!;
+    }
+
     return null;
+  }
+
+  public visitSuperExpr(expr: Super) {
+    const depth = this.locals.get(expr);
+    const superClass = this.environment.getAt(depth!, "super");
+    const object = this.environment.getAt(depth! - 1, "this");
+    assert(superClass instanceof MloxClass);
+    assert(object instanceof MloxInstance);
+    const method = superClass.findMethod(expr.method.lexeme);
+
+    if (!method) {
+      throw new RuntimeError(
+        expr.method,
+        `Undefined property ${expr.method.lexeme}.`,
+      );
+    }
+    return method.bind(object);
   }
 
   public visitVarStmt(stmt: Var) {
