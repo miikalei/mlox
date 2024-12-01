@@ -9,6 +9,12 @@ export class Run {
   hadError = false;
   hadRuntimeError = false;
 
+  stdOut: (output: string) => void;
+
+  constructor(stdOut?: (output: string) => void) {
+    this.stdOut = stdOut ?? console.log;
+  }
+
   runProgram(source: string) {
     this.run(source);
     if (this.hadError) {
@@ -37,7 +43,7 @@ export class Run {
   }
 
   runtimeError(error: RuntimeError) {
-    console.log(error.message + "\n[line " + error.token.line + "]");
+    this.stdOut(error.message + "\n[line " + error.token.line + "]");
     this.hadRuntimeError = true;
   }
 

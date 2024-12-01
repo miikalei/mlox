@@ -40,9 +40,14 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
   environment = this.globals; // Current env, changes with scope
   locals = new Map<Expr, number>();
   reportError?: (error: RuntimeError) => void;
+  stdOut: (output: string) => void;
 
-  constructor(reportError?: (error: RuntimeError) => void) {
+  constructor(
+    reportError?: (error: RuntimeError) => void,
+    stdOut?: (output: string) => void,
+  ) {
     this.reportError = reportError;
+    this.stdOut = stdOut ?? console.log;
 
     this.globals.define(
       "clock",
@@ -169,7 +174,7 @@ export class Interpreter implements ExprVisitor<Value>, StmtVisitor<void> {
 
   public visitPrintStmt(stmt: Print) {
     const value = this.evaluate(stmt.expression);
-    console.log(stringify(value));
+    this.stdOut(stringify(value));
     return null;
   }
 
