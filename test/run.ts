@@ -302,4 +302,9 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
       `);
     assert(spy.calledWith("A method"));
   });
+
+  it("Is nato compatible", function () {
+    new Run().run(`print "a";`);
+    assert(spy.calledOnceWith("Alpha"));
+  });
 });
