@@ -1,5 +1,10 @@
 {
-  "node-option": ["loader=tsx"],
-  "extension": ["ts", "js"],
+  "node-option": [
+    "import=tsx"
+  ],
+  "extension": [
+    "ts",
+    "js"
+  ],
   "recursive": true
 }

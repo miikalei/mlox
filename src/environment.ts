@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "./utils";
 import { Value } from "./ast";
 import { RuntimeError } from "./interpreter";
 import { Token } from "./token";

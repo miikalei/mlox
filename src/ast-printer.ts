@@ -1,6 +1,6 @@
-import { ASTVisitor, Expr } from "./ast";
+import { ExprVisitor, Expr } from "./ast";
 
-export const ASTPrinter: ASTVisitor<string> = {
+export const ASTPrinter: ExprVisitor<string> = {
   visitBinaryExpr: (expr) =>
     parenthesize(expr.operator.lexeme, expr.left, expr.right),
   visitGroupingExpr: (expr) => parenthesize("group", expr.expression),
@@ -11,7 +11,7 @@ export const ASTPrinter: ASTVisitor<string> = {
     }
     return expr.value.toString();
   },
-};
+} as ExprVisitor<string>; // TODO: Support other expr types 
 
 function parenthesize(name: string, ...exprs: Expr[]) {
   const res = [];

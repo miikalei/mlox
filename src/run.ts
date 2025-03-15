@@ -18,11 +18,12 @@ export class Run {
   runProgram(source: string) {
     this.run(source);
     if (this.hadError) {
-      process.exit(65);
+      return 65; // Error code
     }
     if (this.hadRuntimeError) {
-      process.exit(70);
+      return 70; // Error code
     }
+    return 0;
   }
 
   runLine(line: string) {

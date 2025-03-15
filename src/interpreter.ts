@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from './utils'
 import type {
   Expr,
   Literal,
