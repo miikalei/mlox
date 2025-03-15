@@ -5,14 +5,15 @@ import { Scanner } from "./scanner";
 import { Token, TokenType } from "./token";
 
 export class Run {
-  interpreter = new Interpreter(this.runtimeError);
   hadError = false;
   hadRuntimeError = false;
 
+  interpreter: Interpreter;
   stdOut: (output: string) => void;
 
   constructor(stdOut?: (output: string) => void) {
     this.stdOut = stdOut ?? console.log;
+    this.interpreter = new Interpreter(this.runtimeError, this.stdOut)
   }
 
   runProgram(source: string) {
