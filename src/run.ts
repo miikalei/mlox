@@ -10,10 +10,12 @@ export class Run {
 
   interpreter: Interpreter;
   stdOut: (output: string) => void;
+  errOut: (output: string) => void;
 
-  constructor(stdOut?: (output: string) => void) {
+  constructor(stdOut?: (output: string) => void, errOut?: (output: string) => void) {
     this.stdOut = stdOut ?? console.log;
-    this.interpreter = new Interpreter(this.runtimeError, this.stdOut)
+    this.errOut = errOut ?? console.error;
+    this.interpreter = new Interpreter(this.runtimeError.bind(this), this.stdOut.bind(this));
   }
 
   runProgram(source: string) {
@@ -45,12 +47,12 @@ export class Run {
   }
 
   runtimeError(error: RuntimeError) {
-    this.stdOut(error.message + "\n[line " + error.token.line + "]");
+    this.errOut(error.message + "\n[line " + error.token.line + "]");
     this.hadRuntimeError = true;
   }
 
   private report(line: number, where: string, message: string) {
-    console.error(`[Line ${line}] Error ${where}: ${message}`);
+    this.errOut(`[Line ${line}] Error ${where}: ${message}`);
     this.hadError = true;
   }
 

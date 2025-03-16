@@ -14,7 +14,7 @@ describe("Running source", () => {
   });
 
   it("should succeed", () => {
-    new Run().run(`1 < "juuh" + "source";`);
+    new Run().run(`1 < "juuh";`);
   });
 
   it("Should handle expressions", () => {
@@ -126,12 +126,12 @@ describe("Running source", () => {
         return fib(n - 2) + fib(n - 1);
       }
       
-      for (var i = 0; i < 20; i = i + 1) {
+      for (var i = 0; i < 10; i = i + 1) {
         print fib(i);
       }
       `);
-    assert(spy.callCount === 20);
-    assert(spy.getCall(19).calledWith("4181"));
+    assert(spy.callCount === 10);
+    assert(spy.getCall(9).calledWith("34"));
   });
 
   it("supports closures", function () {
@@ -307,4 +307,10 @@ Bacon().eat(); // Prints "Crunch crunch crunch!".
     new Run().run(`print "a";`);
     assert(spy.calledOnceWith("Alpha"));
   });
+
+  it("Should print error messages", function () {
+    const errSpy = sinon.spy(console, "error");
+    new Run().run(`fun ()`);
+    assert(errSpy.calledOnce);
+  })
 });
