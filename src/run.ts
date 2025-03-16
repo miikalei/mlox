@@ -47,7 +47,7 @@ export class Run {
   }
 
   runtimeError(error: RuntimeError) {
-    this.errOut(error.message + "\n[line " + error.token.line + "]");
+    this.errOut(`[Line ${error.token.line}] Error at ${error.token.lexeme}: ${error.message}`)
     this.hadRuntimeError = true;
   }
 
